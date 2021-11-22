@@ -1,6 +1,18 @@
 const $ = (selector) => document.querySelector(selector);
 
+const store = {
+  setLocalStorage(menu) {
+    localStorage.setItem("menu", JSON.stringify(menu));
+  },
+  getLocalStorage() {
+    localStorage.getItem("menu");
+  },
+};
+
 function App() {
+  // 상태는 변하는 데이터, 이 앱에서 변하는 것이 무엇인가 - 메뉴명
+  this.menu = [];
+
   const updateMenuCount = () => {
     const menuCount = $("#espresso-menu-list").querySelectorAll("li").length;
     $(".menu-count").innerText = `총 ${menuCount} 개`;
@@ -12,9 +24,13 @@ function App() {
       return;
     }
     const espressoMenuName = $("#espresso-menu-name").value;
-    const menuItemTemplate = (espressoMenuName) => {
-      return `<li class="menu-list-item d-flex items-center py-2">
-      <span class="w-100 pl-2 menu-name">${espressoMenuName}</span>
+    this.menu.push({ name: espressoMenuName });
+    store.setLocalStorage(this.menu);
+    const template = this.menu
+      .map((menuItem) => {
+        return `
+      <li class="menu-list-item d-flex items-center py-2">
+      <span class="w-100 pl-2 menu-name">${menuItem.name}</span>
       <button
         type="button"
         class="bg-gray-50 text-gray-500 text-sm mr-1 menu-edit-button"
@@ -28,11 +44,10 @@ function App() {
         삭제
       </button>
     </li>`;
-    };
-    $("#espresso-menu-list").insertAdjacentHTML(
-      "beforeend",
-      menuItemTemplate(espressoMenuName)
-    );
+      })
+      .join("");
+
+    $("#espresso-menu-list").innerHTML = template;
     updateMenuCount();
     $("#espresso-menu-name").value = "";
   };
@@ -73,5 +88,6 @@ function App() {
     addMenuName();
   });
 }
-
-App();
+// App(); 으로 할때 this.menu = []; undefined typeerror, const app = new App(); new를 쓰면
+// 정상작동 this와 new 공부하기(https://blog.rhostem.com/posts/2018-07-20-this-in-javascript)
+const app = new App();
